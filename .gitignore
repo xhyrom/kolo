@@ -3,10 +3,6 @@ __pycache__/
 *.py[cod]
 .venv/
 
-# Go binary
-receiver/receiver
-receiver/pit_wall.exe
-
 # Data
 data/*.csv
 *.csv
