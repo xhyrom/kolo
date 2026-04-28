@@ -1,0 +1,15 @@
+[project]
+name = "whub"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Jozef Steinhübl", email = "contact@xhyrom.dev"},
+]
+readme = "README.md"
+license = {text = "Apache License 2.0"}
+
+[project.scripts]
+whub = "whub:__main__.run"
+
+[tool.pdm]
+distribution = false
