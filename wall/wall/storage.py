@@ -16,12 +16,13 @@ class CsvStorage:
         cfg.data_dir.mkdir(parents=True, exist_ok=True)
         self.start_new_session()
 
-    def start_new_session(self) -> None:
+    def start_new_session(self, suffix: str = "") -> None:
         if self.file_obj:
             self.file_obj.close()
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = cfg.data_dir / f"session_{timestamp}.csv"
+        suffix_str = f"_{suffix}" if suffix else ""
+        filename = cfg.data_dir / f"session_{timestamp}{suffix_str}.csv"
 
         self.file_obj = filename.open("w", newline="", encoding="utf-8")
         self.writer = csv.writer(self.file_obj)

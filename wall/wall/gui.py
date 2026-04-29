@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import MaxNLocator
+from matplotlib.widgets import Button, TextBox
 
 from .config import cfg
 from .network import NetworkManager
@@ -65,7 +66,14 @@ class Dashboard:
         self._style_axis(self.ax_accel)
 
         self.fig.canvas.mpl_connect("key_press_event", self.on_key)
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0.1, 1, 1])
+
+        self.ax_box = self.fig.add_axes([0.15, 0.02, 0.3, 0.05])
+        self.text_box = TextBox(self.ax_box, "Suffix: ")
+
+        self.ax_button = self.fig.add_axes([0.5, 0.02, 0.2, 0.05])
+        self.button = Button(self.ax_button, "New Session")
+        self.button.on_clicked(self.on_button_clicked)
 
     def _create_card(self, ax, title: str):
         # hide standard plot lines for cards
@@ -103,7 +111,6 @@ class Dashboard:
         return txt_obj
 
     def _style_axis(self, ax) -> None:
-        # HUSTEJŠIA OS X: Nastavíme maximálne 20 dielikov (aby to urobilo pekné husté štvorčeky)
         ax.xaxis.set_major_locator(MaxNLocator(nbins=20, integer=True))
 
         ax.grid(True, color="#eeeeee", linestyle="-")
@@ -112,24 +119,35 @@ class Dashboard:
         ax.spines["left"].set_color("#cccccc")
         ax.spines["bottom"].set_color("#cccccc")
 
+    def _reset_session(self) -> None:
+        logger.info("triggering session reset...")
+        self.network.send_command("RESET")
+        suffix = self.text_box.text.strip()
+        self.storage.start_new_session(suffix)
+
+        # clear local variables
+        self.speeds.clear()
+        self.accels.clear()
+        self.curr_dist = 0.0
+        self.curr_revs = 0
+        self.max_speed = 0.0
+
+        # instantly update display to zeroes
+        self.txt_dist.set_text("0.0 m")
+        self.txt_revs.set_text("0")
+        self.txt_speed.set_text("0.0")
+        self.txt_max.set_text("0.0")
+
+        # clear plot lines
+        self.line_speed.set_data([], [])
+        self.line_accel.set_data([], [])
+
+    def on_button_clicked(self, event) -> None:
+        self._reset_session()
+
     def on_key(self, event) -> None:
-        if event.key == "r":
-            logger.info("triggering session reset...")
-            self.network.send_command("RESET")
-            self.storage.start_new_session()
-
-            # clear local variables
-            self.speeds.clear()
-            self.accels.clear()
-            self.curr_dist = 0.0
-            self.curr_revs = 0
-            self.max_speed = 0.0
-
-            # instantly update display to zeroes
-            self.txt_dist.set_text("0.0 m")
-            self.txt_revs.set_text("0")
-            self.txt_speed.set_text("0.0")
-            self.txt_max.set_text("0.0")
+        if event.key == "r" and event.inaxes != self.ax_box:
+            self._reset_session()
 
     def update(self, frame):
         updated = False
