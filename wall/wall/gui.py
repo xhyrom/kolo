@@ -154,6 +154,16 @@ class Dashboard:
 
         while not self.queue.empty():
             data = self.queue.get_nowait()
+
+            if data.revs < self.curr_revs:
+                logger.info("remote reset detected! syncing...")
+                self.storage.start_new_session()
+                self.speeds.clear()
+                self.accels.clear()
+                self.curr_dist = 0.0
+                self.curr_revs = 0
+                self.max_speed = 0.0
+
             self.storage.save_record(data)
 
             self.speeds.append(data.velocity_kmh)
