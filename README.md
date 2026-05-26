@@ -1,4 +1,4 @@
-**kolo** is a telemetry and dashboard system written in **python**.
+**kolo** is a telemetry and dashboard system designed for real-time vehicle velocity monitoring using a wireless BLE sensor written in **python**.
 
 ## Why?
 
